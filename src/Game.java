@@ -26,48 +26,14 @@ public class Game {
     }
 
     public boolean isValidFrom(Position position) {
-        if(isColorTurn(Player.WHITE))
-            return isValidByPieceColor(position, WHITE_DIRECTIONS);
-        else return isValidByPieceColor(position, BLACK_DIRECTIONS);
+        return false;
     }
 
-
-
-    public boolean isValidByPieceColor(Position p, Direction[] constant){
-        return (board.isEmpty(constant[0].apply(p)) ||
-                board.isEmpty(constant[1].apply(p)) ||
-                isColor(constant[0].apply(p)) ||
-                isColor(constant[1].apply(p))) &&
-                !board.isEmpty(p) && !isColor(p)
-//                && isValidDirection(p, constant)
-                ;
-    }
-
-//    private boolean isValidDirection(Position p, Direction[] c) {  // no funciona
-//        if(isColorTurn(Player.WHITE)){
-//            return (p.getX() - c[0].apply(p).getX()) > 0 || (p.getX() - c[1].apply(p).getX()) > 0;
-//        }else{
-//            return (p.getX() - c[0].apply(p).getX()) > 0 || (p.getX() - c[1].apply(p).getX()) > 0;
-//        }
-//    }
-
-
-    public boolean isColor(Position p){
-        if(currentPlayer.toString().equals(Player.WHITE.toString())) return board.isBlack(p);
-        else return board.isWhite(p);
-    }
 
 
     // Assumes validFrom is a valid starting position
     public boolean isValidTo(Position validFrom, Position to) {
-        return isValidFrom(validFrom) &&
-                board.isEmpty(to) &&
-                validFrom.sameDiagonalAs(to) &&
-                Position.distance(validFrom,to) == 2 ||
-                isValidFrom(validFrom) &&
-                isColorByTurn(validFrom) &&
-                validFrom.sameDiagonalAs(to) &&
-                Position.distance(validFrom,to) == 4;
+        return false;
     }
 
     private boolean isColorByTurn(Position validFrom) {
@@ -81,15 +47,6 @@ public class Game {
 
     // Assumes both positions are valid
     public Move move(Position validFrom, Position validTo) {
-        if(isValidFrom(validFrom) && isValidTo(validFrom, validTo)){
-            Move move;
-            if(Position.distance(validFrom, validTo) == 4)
-                move = new Move(validFrom, Position.middle(validFrom, validTo),validTo);
-            else move = new Move(validFrom, null, validTo);
-
-            updateBoard(move);
-            return move;
-        }
         return null;
     }
 
