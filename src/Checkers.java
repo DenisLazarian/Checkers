@@ -17,8 +17,8 @@ public class Checkers extends GraphicsProgram {
             "·b·b·b·b\n" +
             "b·b·b·b·\n" +
             "·b·b·b·b\n" +
-            " · · ·b·\n" +
-            "·w· ·b· \n" +
+            " · · · ·\n" +
+            "· · · · \n" +
             "w·w·w·w·\n" +
             "·w·w·w·w\n" +
             "w·w·w·w·";
