@@ -1,3 +1,5 @@
+import java.util.StringTokenizer;
+
 public class Game {
 
     private static final Direction[] WHITE_DIRECTIONS = {Direction.NW, Direction.NE};
@@ -26,83 +28,102 @@ public class Game {
     }
 
     public boolean isValidFrom(Position position) {
-        if(isColorTurn(Player.WHITE))
-            return isValidByPieceColor(position, WHITE_DIRECTIONS);
-        else return isValidByPieceColor(position, BLACK_DIRECTIONS);
+        Direction[] c = (isColorTurn(Player.WHITE)) ? WHITE_DIRECTIONS : BLACK_DIRECTIONS;
+        boolean[] t = new boolean[2];
+
+        isPieceColor(t, c, position);
+        return !hasWon && !board.isEmpty(position) && !isColor(position) &&
+                (board.isEmpty(c[0].apply(position)) ||
+                        board.isEmpty(c[1].apply(position)) ||
+                        t[0] && board.isEmpty(c[0].apply(c[0].apply(position))) ||
+                        t[1] && board.isEmpty(c[1].apply(c[1].apply(position))));
     }
 
-
-
-    public boolean isValidByPieceColor(Position p, Direction[] constant){
-        return (board.isEmpty(constant[0].apply(p)) ||
-                board.isEmpty(constant[1].apply(p)) ||
-                isColor(constant[0].apply(p)) ||
-                isColor(constant[1].apply(p))) &&
-                !board.isEmpty(p) && !isColor(p)
-//                && isValidDirection(p, constant)
-                ;
+    private boolean isColor(Position p){
+        return isColorTurn(Player.WHITE) ? board.isBlack(p) : board.isWhite(p);
     }
-
-//    private boolean isValidDirection(Position p, Direction[] c) {  // no funciona
-//        if(isColorTurn(Player.WHITE)){
-//            return (p.getX() - c[0].apply(p).getX()) > 0 || (p.getX() - c[1].apply(p).getX()) > 0;
-//        }else{
-//            return (p.getX() - c[0].apply(p).getX()) > 0 || (p.getX() - c[1].apply(p).getX()) > 0;
-//        }
-//    }
-
-
-    public boolean isColor(Position p){
-        if(currentPlayer.toString().equals(Player.WHITE.toString())) return board.isBlack(p);
-        else return board.isWhite(p);
-    }
-
 
     // Assumes validFrom is a valid starting position
     public boolean isValidTo(Position validFrom, Position to) {
-        return isValidFrom(validFrom) &&
-                board.isEmpty(to) &&
-                validFrom.sameDiagonalAs(to) &&
-                Position.distance(validFrom,to) == 2 ||
-                isValidFrom(validFrom) &&
-                isColorByTurn(validFrom) &&
-                validFrom.sameDiagonalAs(to) &&
-                Position.distance(validFrom,to) == 4;
+        Direction[] c = (isColorTurn(Player.WHITE)) ? WHITE_DIRECTIONS : BLACK_DIRECTIONS;
+        boolean[] t = new boolean[2];
+
+        isPieceColor(t, c, validFrom);
+        return to.sameDiagonalAs(validFrom) && board.isEmpty(to) &&
+                iAmNotReturningBack(validFrom,to) &&
+                (Position.distance(validFrom,to) == 2 ||
+                        t[0] && to.equals(c[0].apply(c[0].apply(validFrom))) ||
+                        t[1] && to.equals(c[1].apply(c[1].apply(validFrom))));
     }
 
-    private boolean isColorByTurn(Position validFrom) {
+    private void isPieceColor(boolean[] t, Direction[] c, Position vf){
         if(isColorTurn(Player.WHITE)){
-            return board.isBlack(Game.WHITE_DIRECTIONS[0].apply(validFrom)) || board.isBlack(Game.WHITE_DIRECTIONS[1].apply(validFrom));
+            t[0] = board.isBlack(c[0].apply(vf));
+            t[1] = board.isBlack(c[1].apply(vf));
         }else{
-            return board.isWhite(Game.BLACK_DIRECTIONS[0].apply(validFrom)) || board.isWhite(Game.BLACK_DIRECTIONS[1].apply(validFrom));
+            t[0] = board.isWhite(c[0].apply(vf));
+            t[1] = board.isWhite(c[1].apply(vf));
         }
     }
 
+    private boolean iAmNotReturningBack(Position vf, Position vt) {
+        return isColorTurn(Player.WHITE) ?  vf.getY() > vt.getY() : vf.getY() < vt.getY();
+    }
 
     // Assumes both positions are valid
     public Move move(Position validFrom, Position validTo) {
-        if(isValidFrom(validFrom) && isValidTo(validFrom, validTo)){
-            Move move;
-            if(Position.distance(validFrom, validTo) == 4)
-                move = new Move(validFrom, Position.middle(validFrom, validTo),validTo);
-            else move = new Move(validFrom, null, validTo);
+        Move move;
+        if(Position.distance(validFrom, validTo) == 4)
+            move = new Move(validFrom, Position.middle(validFrom, validTo),validTo);
+        else
+            move = new Move(validFrom, null, validTo);
 
-            updateBoard(move);
-            return move;
-        }
-        return null;
+        updateBoard(move);
+        checkAndDeclareWinner(move);
+        changePlayerTurn();
+        return move;
+    }
+
+    private void checkAndDeclareWinner(Move move) {
+        if(isColorTurn(Player.BLACK) && (move.getTo().getY() == board.getHeight()-1 || totalMoves('w') == 0))
+            this.hasWon = true;
+        else if(isColorTurn(Player.WHITE) && (move.getTo().getY() == 0 || totalMoves('b') == 0))
+            this.hasWon = true;
     }
 
     private void updateBoard(Move move) {
-        if(isColorTurn(Player.WHITE)) {
+        if(isColorTurn(Player.WHITE))
             board.setWhite(move.getTo());
-            currentPlayer = Player.BLACK;
-        } else {
+        else
             board.setBlack(move.getTo());
-            currentPlayer = Player.WHITE;
-        }
+
         board.setEmpty(move.getMiddle());
         board.setEmpty(move.getFrom());
+    }
+
+    private int totalMoves(char c){
+        Player turnBefore = currentPlayer;
+        currentPlayer = (c == 'b') ? Player.BLACK : Player.WHITE;
+
+        int validMoves = 0, x = 0;
+        for (int i = 0; i < board.getHeight(); i++) {
+            int j = 0;
+            while(j < board.getWidth()) {
+                if(board.toString().charAt(x) != '\n'){
+                    if(c == board.toString().charAt(x) && isValidFrom(new Position(j, i))) {
+                        validMoves++;
+                    }
+                    j++;
+                }
+                x++;
+            }
+        }
+        currentPlayer = turnBefore;
+        return validMoves;
+    }
+
+    private void changePlayerTurn(){
+        if(!hasWon) this.currentPlayer = isColorTurn(Player.WHITE) ? Player.BLACK : Player.WHITE;
     }
 
     // Only for testing

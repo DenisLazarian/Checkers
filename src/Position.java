@@ -5,8 +5,6 @@ public class Position {
     private final int x;
     private final int y;
 
-    private static final int length = 8;
-
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
@@ -21,55 +19,8 @@ public class Position {
     }
 
     public boolean sameDiagonalAs(Position other) {
-        return diagonal(other) || contraDiagonal(other);
+        return Math.abs(this.x - other.x) == Math.abs(this.y - other.y);
     }
-
-    private boolean diagonal(Position other) {
-        int x = this.x;
-        int y = this.y;
-        do{
-            if(other.checkCoords(x, y)) return true;
-            x++;
-            y++;
-        } while(x < length && y < length);
-
-        x = this.x;
-        y = this.y;
-        do{
-            if(other.checkCoords(x, y)) return true;
-            x--;
-            y--;
-        }while(x >= 0 && y >= 0);
-
-        return false;
-    }
-
-    private boolean contraDiagonal(Position other) {
-        int y = this.y;
-        int x = this.x;
-        do{
-            if(other.checkCoords(x, y)) return true;
-            x++;
-            y--;
-        } while(y >= 0);
-
-        x = this.x;
-        y = this.y;
-        do{
-            if(other.checkCoords(x, y)) return true;
-            x--;
-            y++;
-        }while(x >= 0);
-
-        return false;
-    }
-
-
-    private boolean checkCoords(int x, int y){
-        return this.x == x && this.y == y;
-    }
-
-
 
     public static int distance(Position pos1, Position pos2) {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
