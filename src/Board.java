@@ -48,7 +48,7 @@ public class Board {
         return numWhites;
     }
 
-    private boolean isOutOfBounds(Position pos){ // added for me.
+    private boolean isOutOfBounds(Position pos){
         return  pos.getX() >= width  ||
                 pos.getX() < 0       ||
                 pos.getY() >= height ||
@@ -72,7 +72,7 @@ public class Board {
     }
 
     public void setBlack(Position pos) {
-        if(pos != null && !isForbidden(pos)) {
+        if(!isForbidden(pos)) {
             cells[pos.getY()][pos.getX()] = Cell.BLACK;
             numBlacks++;
         }

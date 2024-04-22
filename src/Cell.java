@@ -19,13 +19,15 @@ public class Cell {
     }
 
     public static Cell fromChar(char status) {
+        Cell c = null;
         switch (status) {
-            case C_EMPTY -> { return Cell.EMPTY; }
-            case C_FORBIDDEN -> { return Cell.FORBIDDEN; }
-            case C_WHITE -> { return Cell.WHITE; }
-            case C_BLACK -> { return Cell.BLACK; }
-            default -> { return null; }
+            case C_FORBIDDEN:   c = Cell.FORBIDDEN;     break;
+            case C_EMPTY:       c = Cell.EMPTY;         break;
+            case C_WHITE:       c = Cell.WHITE;         break;
+            case C_BLACK:       c = Cell.BLACK;         break;
+            default: break;
         }
+        return c;
     }
 
 
